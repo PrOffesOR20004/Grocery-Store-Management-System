@@ -1,0 +1,398 @@
+import os
+import mysql.connector
+import datetime
+now = datetime.datetime.now()
+def clrscr():
+    print('\n'*5)
+def items():
+    while True:
+        print("\t\t\t 1. Add New Item")
+        print("\t\t\t 2. Show Items")
+        print("\t\t\t 3. Modify Item")
+        print("\t\t\t 4. Delete Item")
+        print("\t\t\t 5. Back (Main Menu)")
+        ch = int(input("\t\t Enter Your Choice :"))
+        if ch == 1:
+            add_item()
+        if ch == 2:
+            search_item()
+        if ch == 3:
+            update_item()
+        if ch == 4:
+            delete_item()
+        if ch == 5:
+            break
+def orders():
+    while True:
+        print("\t\t\t 1. Add Order")
+        print("\t\t\t 2. List Order")
+        print("\t\t\t 3. Back (Main Menu)")
+        ch = int(input("\t\t Enter Your Choice :"))
+        if ch == 1:
+            add_order()
+        if ch == 2:
+            list_order()
+        if ch == 3:
+            break
+def sale_of_items( ):
+    while True:
+        print("\t\t\t 1. Sale Items")
+        print("\t\t\t 2. List Sales")
+        print("\t\t\t 3. Back (Main Menu)")
+        ch = int (input("\t\t Enter Your Choice :"))
+        if ch == 1:
+            sale_item()
+        if ch == 2:
+            list_sale()
+        if ch == 3:
+            break
+def users():
+    while True:
+        print("\t\t\t 1. Add user")
+        print("\t\t\t 2. List user")
+        print("\t\t\t 3. Back (Main Menu)")
+        u = int(input("\t\t Enter Your Choice :"))
+        if u == 1:
+            add_user()
+        if u == 2:
+            list_user()
+        if u == 3:
+            break
+def deliveries():
+    while True:
+        print("\t\t\t 1. Update delivery Status")
+        print("\t\t\t 2. List all deliveries")
+        print("\t\t\t 3. Back (Main Menu)")
+        u = int(input("\t\t Enter Your Choice :"))
+        if u == 1:
+            update_deliv()
+        if u == 2:
+            list_deliv()
+        if u == 3:
+            break
+def create_database():
+    mydb = mysql.connector.connect(host="localhost", user="root", password="root", database="stock")
+    mycursor = mydb.cursor()
+
+    qry="CREATE DATABASE IF NOT EXISTS STOCK"
+    mycursor.execute(qry)
+
+    print("Creating ITEM table")
+    qry = "CREATE TABLE if not exists ITEM(I_code int(4) PRIMARY KEY, I_name char(30) NOT NULL, I_price float(8,2),I_qty int(4), I_cat char(30));"
+    mycursor.execute(qry)
+    print("ITEM table created")
+
+    print("Creating ORDER table")
+    qry = "CREATE TABLE if not exists orders(O_id int(4)PRIMARY KEY,O_date DATE, It_code char(30) NOT NULL ,It_Price float(8,2),It_qty int(4));"
+    mycursor.execute(qry)
+    print("ORDER table created")
+
+    print("Creating SALES table")
+    qry = "CREATE TABLE if not exists sales(S_id int(8) PRIMARY KEY,S_date DATE,It_code char(30) references ITEM(I_code),S_price float(8,2),S_qty int(4),S_tot int(10));"
+    mycursor.execute(qry)
+    print("SALES table created")
+
+    print("Creating DELIVERY table")
+    qry="CREATE TABLE if not exists deliver_Ord(D_id int(10) PRIMARY KEY,D_person varchar(30),D_date DATE,Sale_id int(4) references sales(S_id),D_status varchar(15));"
+    mycursor.execute(qry)
+    print("DELIVERY table created")
+
+    print("Creating USER table")
+    qry = "CREATE TABLE if not exists user (uid char(6) PRIMARY KEY,uname char(30) NOT NULL,upwd char(30));"
+    mycursor.execute(qry)
+    print("USER table created")
+
+def list_database():
+    mydb = mysql.connector.connect(host="localhost", user="root",password="root",database="stock")
+    mycursor = mydb.cursor()
+    qry = "show tables;"
+    mycursor.execute(qry)
+    for i in mycursor:
+        print(i)
+
+def add_item():
+    mydb = mysql.connector.connect(host="localhost", user="root",password="root",database="stock")
+    mycursor = mydb.cursor()
+    
+    code = int(input("\t\t Enter Item code :"))
+    search = "SELECT count(*) FROM ITEM WHERE I_code={}".format(code)
+    mycursor.execute(search)
+    for x in mycursor:
+        cnt = x[0]
+    if cnt == 0:
+        name = input("\t\t Enter item name :")
+        qty = int(input("\t\t Enter item quantity :"))
+        price = float(input("\t\t Enter unit price of item :"))
+        cat = input("\t\t Enter item category :")
+        qry = "INSERT INTO ITEM(I_code,I_name,I_price,I_qty,I_cat) values ({},'{}',{},{},'{}')".format(code,name,price,qty,cat)
+        mycursor.execute(qry)
+        print("New Item added")
+        mydb.commit()
+    else:
+        print("\t\t Item already exist")
+        
+def search_item():
+    while True:
+        print("\t\t\t 1. List all items")
+        print("\t\t\t 2. List items code wise")
+        print("\t\t\t 3. List items category wise")
+        print("\t\t\t 4. Back (Main Menu)")
+        s = int(input("\t\t Enter Your Choice :"))
+        if s == 1:
+            list_item()
+        if s == 2:
+            code=int(input(" Enter product code :"))
+            list_itemcode(code)
+        if s == 3:
+            cat=input("Enter category :")
+            list_itemcat(cat)
+        if s == 4:
+            break
+
+def list_item():
+    mydb = mysql.connector.connect(host="localhost", user="root", password="root",database="stock")
+    mycursor = mydb.cursor()
+    qry = "SELECT * from item"
+    mycursor.execute(qry)
+    print("\t\t\t\t ITEM DETAILS")
+    print("\t\t", "-" * 47)
+    print("\t\t code",' '*4," name",' '*4," price ",' '*4,"quantity category")
+    print("\t\t", "-" * 47)
+    for i in mycursor:
+        s1=str(i[0])
+        nm=i[1]
+        print("\t\t", s1.strip(), ' '*4, nm.strip(), "\t", i[2], "\t", i[3], "\t\t", i[4])
+        print("\t\t", "-" * 47)
+
+def list_itemcode(code):
+    mydb = mysql.connector.connect(host="localhost", user="root", password="root", database="stock")
+    mycursor = mydb.cursor()
+    qry = "SELECT * from item WHERE I_code={}".format(code)
+    mycursor.execute(qry)
+    print("\t\t\t\t ITEM DETAILS")
+    print("\t\t", "-" * 47)
+    print("\t\t code name price quantity category")
+    print("\t\t", "-" * 47)
+    for i in mycursor:
+        print("\t\t", i[0], "\t", i[1], "\t", i[2], "\t", i[3], "\t\t", i[4])
+        print("\t\t", "-" * 47)
+
+def list_itemcat(cat):
+    mydb = mysql.connector.connect(host="localhost", user="root",password="root", database="stock")
+    mycursor = mydb.cursor()
+    print(cat)
+    qry="SELECT * from item WHERE I_cat ='{}'".format(cat)
+    mycursor.execute(qry)
+    clrscr()
+    print("\t\t\t\t ITEM DETAILS")
+    print("\t\t", "-" * 47)
+    print("\t\t code",' '*20,"name price quantity category")
+    print("\t\t", "-" * 47)
+    for i in mycursor:
+        print("\t\t", i[0], ' '*3, i[1], "\t", i[2], "\t", i[3], "\t\t", i[4])
+        print("\t\t", "-" * 47)
+def update_item():
+    mydb = mysql.connector.connect(host="localhost", user="root",password="root", database="stock")
+    mycursor = mydb.cursor()
+    code = int(input("Enter the item code :"))
+    qty = int(input("Enter the quantity :"))
+    qry = "UPDATE item SET I_qty=I_qty+{q} WHERE I_code={cd}".format(q=qty,cd=code)
+    mycursor.execute(qry)
+    mydb.commit()
+    print("\t\t Item details updated")
+    
+def delete_item():
+    mydb = mysql.connector.connect(host="localhost", user="root", password="root", database="stock")
+    mycursor=mydb.cursor()
+    code = int(input("Enter the product code :"))
+    qry = "DELETE FROM item WHERE I_code = {}".format(code)
+    mycursor.execute(qry)
+    mydb.commit()
+    print(mycursor.rowcount,"record(s) deleted");
+
+def add_order():
+    mydb = mysql.connector.connect(host="localhost", user="root", password="root", database="stock")
+    mycursor = mydb.cursor()
+    now = datetime.datetime.now()
+    code = int(input("Enter Item code :"))
+    oid= now.year+now.month+now.day+now.hour+now.minute+now.second
+    odate = datetime.date.today()
+    qty = int(input("Enter Item quantity : "))
+    price = float(input("Enter Item unit price: "))
+    
+    #cat = input("Enter product category: ")
+    #supplier = input("Enter Supplier details: ") 
+    qry = "INSERT INTO orders (O_id, O_date, It_code, It_price, It_qty) values({},'{}',{},{},{})".format(oid,odate,code,price,qty)
+    mycursor.execute(qry)
+    mydb.commit()
+def list_order():
+    mydb = mysql.connector.connect(host="localhost", user="root", password="root", database="stock")
+    mycursor = mydb.cursor()
+    qry = "SELECT * from orders"
+    mycursor.execute(qry)
+    print("\t\t\t\t\t\t\t ORDER DETAILS")
+    print("-"*85)
+    print("orderid date Item code price quantity ")
+    print("-" * 85)
+    for i in mycursor:
+        print(i[0], "\t", i[1], "\t", i[2], "\t", i[3], "\t", i[4])
+        print("-" * 85)
+def sale_item():
+    mydb = mysql.connector.connect(host="localhost", user="root", password="root", database="stock")
+    mycursor = mydb.cursor()
+    icode = int(input("Enter product code: "))
+    qry = "SELECT count(*) from ITEM WHERE I_code={}".format(icode)
+    mycursor.execute(qry)
+    for x in mycursor:
+        cnt = x[0]
+    if cnt != 0 :
+        qry = "SELECT * from ITEM WHERE I_code={}".format(icode)
+        mycursor.execute(qry)
+        for x in mycursor:
+            print(x)
+            price = int(x[2])
+            iqty = int(x[3])
+        ''' If quantity available then add row to sales table,
+        update qty of item table and
+        allot order in deliver_ord table'''
+        now = datetime.datetime.now()
+        qty = int(input("Enter no of quantity :"))
+        sno=0
+        if qty <= iqty:
+            total = qty * price
+            print(' '*30,"BILL")
+            print("Sno",' '*5,'Item_Name',' '*5,"Price",' '*5,"qty",' '*5,"Total")
+            qry = "SELECT * from ITEM WHERE I_code={}".format(icode)
+            mycursor.execute(qry)
+            for x in mycursor:
+                inm=x[1]
+                iprice=x[2]
+                iqty=x[3]
+                tot=iprice*qty
+                sno=sno+1
+                print('-'*47)
+                print(sno,' '*5,inm,' '*5,iprice,' '*5,qty,' '*5,tot)
+                print('-'*47)
+            
+            #print("Collect Rs. ", total)
+            sid= now.year+now.month+now.day+now.second+icode
+            qry = "INSERT into sales values(%s,%s,%s,%s,%s,%s)"
+            val = (sid,datetime.date.today(),icode,price,qty,total)
+            mycursor.execute(qry,val)
+            qry = "UPDATE item SET I_qty=I_qty-%s WHERE I_code=%s"
+            val = (qty, icode)
+            mycursor.execute(qry, val)
+            print("Order Executed")
+
+            Did= now.year+now.month+now.day+now.hour+now.minute+now.second
+            Dperson=input("Enter delivery person name ")
+            qry = "INSERT into deliver_ord values(%s,%s,%s,%s,%s)"
+            val = (Did,Dperson,datetime.date.today(),sid,"In-Transit")
+            mycursor.execute(qry,val)
+            mydb.commit()
+        else:
+            print("Quantity not available")
+    else:
+        print("Item is not available")
+         
+def list_sale():
+    mydb = mysql.connector.connect(host="localhost", user="root",password="root", database="stock")
+    mycursor = mydb.cursor()
+    qry = "SELECT * FROM sales"
+    mycursor.execute(qry)
+    print("\t\t\t\t SALES DETAILS")
+    print("-" * 80)
+    print("Sales ID Date Product Code Price Quantity Total")
+    print("-" * 80)
+    for x in mycursor:
+        print(x[0], "\t", x[1], "\t", x[2], "\t", x[3], "\t\t", x[4], "\t\t", x[5])
+        print("-" * 80)
+
+def update_deliv():
+    mydb = mysql.connector.connect(host="localhost", user="root",password="root", database="stock")
+    mycursor = mydb.cursor()
+    did=int(input("Enter delivery id"))
+    dstatus=input("Enter delivery status")
+    qry="UPDATE deliver_ord set D_status='{}' WHERE D_id={}".format(dstatus,did)
+    mycursor.execute(qry)
+    mydb.commit()
+
+def list_deliv():
+    mydb = mysql.connector.connect(host="localhost", user="root",password="root", database="stock")
+    mycursor = mydb.cursor()
+    qry="SELECT * FROM deliver_ord"
+    mycursor.execute(qry)
+    print("\t\t\t\t\t\t\t DELIVER DETAILS")
+    print("-"*85)
+    print("Deliver_id  Person  Date  Sale_ Id  Delivery_Status")
+    print("-" * 85)
+    for i in mycursor:
+        print(i[0], "\t", i[1], "\t", i[2], "\t", i[3], "\t", i[4])
+        print("-" * 85)
+    
+def user_mgmt():
+    while True:
+        print("\t\t\t 1. Add user")
+        print("\t\t\t 2. List user")
+        print("\t\t\t 3. Back (Main Menu)")
+        u = int(input("\t\t Enter Your Choice :"))
+        if u == 1:
+            add_user()
+        if u == 2:
+            list_user()
+        if u == 3:
+            break
+def add_user():
+    mydb = mysql.connector.connect(host="localhost", user="root", password="root", database="stock")
+    mycursor = mydb.cursor()
+    uid = input("Enter emaid id :")
+    name = input("Enter Name :")
+    password = input("Enter Password :")
+    qry = "INSERT INTO user values (%s,%s,%s);"
+    val = (uid, name, password)
+    mycursor.execute(qry, val)
+    mydb.commit()
+    print(mycursor.rowcount, "user created")
+
+def list_user():
+    mydb = mysql.connector.connect(host="localhost", user="root", password="root", database="stock")
+    mycursor = mydb.cursor()
+    qry = "SELECT uid, uname from user"
+    mycursor.execute(qry)
+    clrscr()
+    print("\t\t\t\t USER DETAILS")
+    print("\t\t", "-" * 27)
+    print("\t\t UID name ")
+    print("\t\t", "-" * 27)
+    for i in mycursor:
+        print("\t\t", i[0], "\t", i[1])
+        print("\t\t", "-" * 27)
+
+    
+while True:
+    clrscr()
+    print("\t\t\t GROCERY MANAGEMENT")
+    print("\t\t\t **\n")
+    print("\t\t 1. ITEMS MANAGEMENT")
+    print("\t\t 2. PURCHASE MANAGEMENT")
+    print("\t\t 3. SALES MANAGEMENT")
+    print("\t\t 4. UPDATE DELIVERY STATUS")
+    print("\t\t 5. USER MANAGEMENT")
+    print("\t\t 6. DATABASE SETUP")
+    print("\t\t 7. EXIT\n")
+    n = int(input("Enter your choice :"))
+    if n == 1:
+        items()
+    if n == 2:
+        os.system('cls')
+        orders()
+    if n == 3:
+        sale_of_items()
+    if n == 4:
+        deliveries()        
+    if n == 5:
+        user_mgmt()
+    if n == 6:
+        create_database()
+    if n == 7:
+        break
