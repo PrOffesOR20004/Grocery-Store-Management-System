@@ -39,7 +39,7 @@ This project is a simple and effective **Grocery Store Management System** built
 
 2. **Navigate to the project directory:**  
 ```bash
- cd Grocery-Store-Management
+ cd Grocery-Store-Management-System
 ```
 
 3. **Install required packages (if any):**  
