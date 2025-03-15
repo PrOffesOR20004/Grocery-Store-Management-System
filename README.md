@@ -42,16 +42,9 @@ This project is a simple and effective **Grocery Store Management System** built
  cd Grocery-Store-Management-System
 ```
 
-3. **Install required packages (if any):**  
-```bash
- pip install -r requirements.txt
-```
+3. **Install the necessary dependencies and libraries :**  
 
-4. **Run the application:**  
-```bash
- python main.py
-```
-
+4. **Run the application locally or deploy it to a server.**  
 ---
 
 ## 📌 Future Enhancements
