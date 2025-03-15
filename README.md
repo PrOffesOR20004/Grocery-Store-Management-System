@@ -34,7 +34,7 @@ This project is a simple and effective **Grocery Store Management System** built
 ## 🚀 Getting Started
 1. **Clone the repository:**  
 ```bash
- git clone https://github.com/PrOffesOR20004/Grocery-Store-Management.git
+ git clone https://github.com/PrOffesOR20004/Grocery-Store-Management-System.git
 ```
 
 2. **Navigate to the project directory:**  
