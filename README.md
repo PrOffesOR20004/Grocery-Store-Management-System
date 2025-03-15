@@ -42,7 +42,7 @@ This project is a simple and effective **Grocery Store Management System** built
  cd Grocery-Store-Management-System
 ```
 
-3. **Install the necessary dependencies and libraries :**  
+3. **Install the necessary dependencies and libraries .**  
 
 4. **Run the application locally or deploy it to a server.**  
 ---
